@@ -1,0 +1,135 @@
+spring:
+  config:
+    import: optional:file:/Users/mac/Downloads/AI-Powered-Job-Application-Tracker/.env[.properties]
+
+  application:
+    name: AiJobApplicationTracker
+
+  r2dbc:
+    url: ${MYSQL_DATABASE_URL}
+    username: ${MYSQL_DATABASE_USERNAME}
+    password: ${MYSQL_DATABASE_PASSWORD}
+    pool:
+      enabled: true
+      initial-size: 10
+      max-size: 20
+      validation-query: SELECT 1
+      max-idle-time: 30m
+      max-life-time: 60m
+      max-acquire-time: 10s
+
+  datasource:
+    url: ${POSTGRES_DATABASE_URL}
+    username: ${POSTGRES_DATABASE_USERNAME}
+    password: ${POSTGRES_DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: true
+    user: ${MYSQL_DATABASE_USERNAME}
+    password: ${MYSQL_DATABASE_PASSWORD}
+    url: ${FLYWAY_DATABASE_URL}
+    locations: classpath:db/migration
+
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: ai-job-application-tracker-group
+      auto-offset-reset: earliest
+    producer:
+      bootstrap-servers: localhost:9092
+    listener:
+      type: single
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini
+
+
+    vectorstore:
+      pgvector:
+        index-type: hnsw
+        distance-type: cosine-distance
+        dimensions: 1536
+        initialize-schema: true
+        schema-name: public
+        table-name: resume_vectors
+        schema-validation: false
+        max-document-batch-size: 10000
+    retry:
+      backoff:
+        initial-interval: 120000
+        multiplier: 2
+        max-interval: 600000
+      max-attempts: 5
+  cache:
+    type: redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 10
+          min-idle: 5
+          max-wait: 2000ms
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+  mail:
+    host: smtp.mail.yahoo.com
+    port: 465
+    username: ${EMAIL_USERNAME}
+    password: ${EMAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+            socketFactory:
+              class: javax.net.ssl.SSLSocketFactory
+
+logging:
+  level:
+    org:
+      springframework:
+        ai:
+          chat:
+            client:
+              advisor: DEBUG
+        r2dbc:
+          core: DEBUG
+        data:
+          redis:
+            core: DEBUG
+            connection: DEBUG
+    io:
+      r2dbc:
+        pool: DEBUG
+      lettuce:
+        core: DEBUG
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /swagger-doc/v3/api-docs
+  swagger-ui:
+    path: /swagger-doc/swagger-ui
+
+jwt:
+  key: ${JWT_KEY}
+
+azure:
+  blob:
+    connection-string: ${AZURE_BLOB_CONNECTION_STRING}
+    container-name: ${AZURE_BLOB_CONTAINER_NAME}
+
+email:
+  username: ${EMAIL_USERNAME}
